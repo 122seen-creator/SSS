@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الشواهد والمنجزات | المهارات الرقمية</title>
+    <!-- خط تجوال الرسمي للهوية الوزارية -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- مكتبة الأيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبة Signature Pad للتوقيع -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <!-- مكتبة SweetAlert2 للتنبيهات التفاعلية -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --moe-green: #006837;
+            --moe-green-dark: #004d28;
+            --moe-gold: #c59b27;
+            --bg-light: #f8faf9;
+            --text-dark: #2d3748;
+            --white: #ffffff;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* الهيدر وشريط الهوية */
+        header {
+            background: linear-gradient(135deg, var(--moe-green) 0%, var(--moe-green-dark) 100%);
+            color: var(--white);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--moe-gold);
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* بطاقة المعلومات الأساسية */
+        .info-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            border-right: 6px solid var(--moe-gold);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-item i {
+            font-size: 1.5rem;
+            color: var(--moe-green);
+        }
+
+        .info-item div span {
+            display: block;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .info-item div strong {
+            font-size: 1.05rem;
+            color: var(--text-dark);
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-top: 4px solid var(--moe-green);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: var(--moe-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+
+        /* شبكة عرض الشواهد النصية القابلة للنقر */
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .evidence-card {
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+            padding: 20px;
+            border-right: 4px solid var(--moe-green);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+        }
+
+        .evidence-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-right-color: var(--moe-gold);
+            background-color: #f8fdf9;
+        }
+
+        .evidence-icon {
+            font-size: 1.8rem;
+            color: var(--moe-green);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .click-hint {
+            font-size: 0.8rem;
+            color: var(--moe-gold);
+            font-weight: 700;
+            background: #fffbeb;
+            padding: 3px 8px;
+            border-radius: 5px;
+            border: 1px solid #fef3c7;
+        }
+
+        .evidence-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--moe-green-dark);
+        }
+
+        .evidence-desc {
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* النموذج والتوقيع */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #ffffff;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        input[readonly] {
+            background-color: #f8fafc;
+        }
+
+        .signature-container {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            background-color: #fafafa;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 180px;
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+
+        .btn {
+            background-color: var(--moe-green);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--moe-green-dark);
+        }
+
+        .btn-gold {
+            background-color: var(--moe-gold);
+        }
+
+        .btn-gold:hover {
+            background-color: #b08920;
+        }
+
+        .btn-clear {
+            background-color: #e2e8f0;
+            color: #475569;
+            padding: 6px 15px;
+            font-size: 0.85rem;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+        }
+
+        .btn-clear:hover {
+            background-color: #cbd5e1;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            background: #f0fdf4;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--moe-green);
+            cursor: pointer;
+        }
+
+        /* رسالة الاعتماد المكتملة */
+        .approved-box {
+            display: none;
+            background: #f0fdf4;
+            border: 2px solid var(--moe-green);
+            border-radius: var(--radius);
+            padding: 25px;
+            text-align: center;
+        }
+
+        .approved-box i {
+            font-size: 3.5rem;
+            color: var(--moe-green);
+            margin-bottom: 15px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1 class="header-title"><i class="fa-solid fa-graduation-cap"></i> وزارة التعليم</h1>
+            <p class="header-subtitle">منصة الاعتماد والتوقيع على الشواهد والمنجزات الأكاديمية</p>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- بطاقة البيانات التعريفية -->
+        <div class="info-card">
+            <div class="info-item">
+                <i class="fa-solid fa-user-tie"></i>
+                <div>
+                    <span>إعداد المعلم:</span>
+                    <strong>سلطان العقلاء</strong>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-laptop-code"></i>
+                <div>
+                    <span>المادة الدراسية:</span>
+                    <strong>المهارات الرقمية</strong>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-building-user"></i>
+                <div>
+                    <span>موجه إلى المدير القدير:</span>
+                    <strong>عياد الخالد</strong>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-calendar-days"></i>
+                <div>
+                    <span>تاريخ التقديم:</span>
+                    <strong id="displayHijriDate">جاري التحميل...</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- سجل الشواهد والمنجزات (نصي قابل للنقر) -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-list-check"></i>
+                <h2>سجل الشواهد والمنجزات (اضغط على الشاهد لفتح الرابط)</h2>
+            </div>
+            <div class="evidence-grid" id="evidenceGrid">
+                
+                <!-- 🔗 الشاهد 1 -->
+                <a href="https://drive.google.com" target="_blank" class="evidence-card">
+                    <div class="evidence-icon">
+                        <i class="fa-solid fa-clipboard-user"></i>
+                        <span class="click-hint"><i class="fa-solid fa-arrow-up-right-from-square"></i> استعراض</span>
+                    </div>
+                    <div class="evidence-title">سجل متابعة الطلاب الإلكتروني</div>
+                    <div class="evidence-desc">متابعة وتقييم مستويات الطلاب والأداء السلوكي والأكاديمي بصورة دورية ومستمرة.</div>
+                </a>
+
+                <!-- 🔗 الشاهد 2 -->
+                <a href="https://drive.google.com" target="_blank" class="evidence-card">
+                    <div class="evidence-icon">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span class="click-hint"><i class="fa-solid fa-arrow-up-right-from-square"></i> استعراض</span>
+                    </div>
+                    <div class="evidence-title">سجل توزيع منهج المهارات الرقمية</div>
+                    <div class="evidence-desc">التوزيع الزمني المعتمد للوحدات والدروس وفق الخطة الدراسية الرسمية المعتمدة.</div>
+                </a>
+
+                <!-- 🔗 الشاهد 3 -->
+                <a href="https://madrasati.sa" target="_blank" class="evidence-card">
+                    <div class="evidence-icon">
+                        <i class="fa-solid fa-laptop-house"></i>
+                        <span class="click-hint"><i class="fa-solid fa-arrow-up-right-from-square"></i> استعراض</span>
+                    </div>
+                    <div class="evidence-title">شواهد منصة مدرستي</div>
+                    <div class="evidence-desc">التكليفات، الواجبات، الاختبارات الإلكترونية، والدروس التفاعلية المفعلة عبر المنصة.</div>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- نموذج إقرار المدير والتوقيع -->
+        <div class="card" id="approvalCard">
+            <div class="card-title">
+                <i class="fa-solid fa-file-signature"></i>
+                <h2>إقرار واعتماد قائد/مدير المدرسة</h2>
+            </div>
+            <form id="signatureForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="directorName">اسم القائد/المدير:</label>
+                        <input type="text" id="directorName" value="عياد الخالد" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="approvalHijriDate">تاريخ الاعتماد (بالهجري):</label>
+                        <input type="text" id="approvalHijriDate" placeholder="مثال: 02 ربيع الأول 1448 هـ" required>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="acknowledge" required>
+                    <label for="acknowledge" style="margin:0; font-weight: 600;">
+                        أقر أنا المدير/ عياد الخالد بأني اطلعت على كافة الشواهد والمنجزات المذكورة أعلاه والمقدمة من المعلم/ سلطان العقلاء لمادة المهارات الرقمية وأعتمدها رسمياً.
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>توقيع المدير الإلكتروني (يرجى التوقيع في الصندوق أدناه):</label>
+                    <div class="signature-container">
+                        <button type="button" class="btn btn-clear" onclick="clearSignature()"><i class="fa-solid fa-eraser"></i> مسح التوقيع</button>
+                        <canvas id="signatureCanvas"></canvas>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; justify-content: center; font-size: 1.1rem; margin-top: 15px;">
+                    <i class="fa-solid fa-circle-check"></i> اعتماد وتوقيع الشواهد
+                </button>
+            </form>
+        </div>
+
+        <!-- صندوق الاعتماد المكتمل (يظهر للمدير بعد التوقيع) -->
+        <div class="approved-box" id="approvedBox">
+            <i class="fa-solid fa-circle-check"></i>
+            <h2>تم اعتماد الشواهد بنجاح</h2>
+            <p id="approvedDetails" style="margin-top: 10px; font-size: 1.1rem;"></p>
+            <div style="margin-top: 15px;">
+                <p style="font-size:0.9rem; color:#64748b;">التوقيع المعتمد:</p>
+                <img id="savedSignature" src="" alt="توقيع المدير" style="max-height: 90px; border-bottom: 2px solid var(--moe-green);">
+            </div>
+            <button class="btn btn-gold" onclick="window.print()" style="margin-top: 20px;">
+                <i class="fa-solid fa-print"></i> طباعة وثيقة الاعتماد
+            </button>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>جميع الحقوق محفوظة © 2026 - وزارة التعليم | المملكة العربية السعودية</p>
+    </footer>
+
+    <script>
+        // إعداد التاريخ الهجري التلقائي
+        const today = new Date();
+        const hijriFormatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        const formattedHijri = hijriFormatter.format(today);
+
+        // عرض التاريخ الهجري في بطاقة التعريف
+        document.getElementById('displayHijriDate').innerText = formattedHijri;
+
+        // تعبئة حقل تاريخ الاعتماد بالهجري تلقائياً مع قابلية التعديل
+        document.getElementById('approvalHijriDate').value = formattedHijri;
+
+        // إعداد لوحة التوقيع الرقمي
+        const canvas = document.getElementById('signatureCanvas');
+        const signaturePad = new SignaturePad(canvas, {
+            backgroundColor: 'rgba(255, 255, 255, 0)',
+            penColor: '#004d28'
+        });
+
+        // ضبط مقاسات لوحة الرسم
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            signaturePad.clear();
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        function clearSignature() {
+            signaturePad.clear();
+        }
+
+        // إرسال وحفظ توقيع المدير
+        document.getElementById('signatureForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (signaturePad.isEmpty()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'تنبيه',
+                    text: 'سعادة المدير عياد الخالد، يرجى التوقيع داخل المربع المخصص قبل الاعتماد.',
+                    confirmButtonColor: '#006837'
+                });
+                return;
+            }
+
+            const name = document.getElementById('directorName').value;
+            const hijriDate = document.getElementById('approvalHijriDate').value;
+            const signatureDataURL = signaturePad.toDataURL();
+
+            // إخفاء نموذج التوقيع وإظهار رسالة الاعتماد النهائية
+            document.getElementById('approvalCard').style.display = 'none';
+            const approvedBox = document.getElementById('approvedBox');
+            document.getElementById('approvedDetails').innerHTML = `تم الاطلاع والاعتماد من قبل القائد/ <strong>${name}</strong> للمعلم/ <strong>سلطان العقلاء</strong> بتاريخ <strong>${hijriDate}</strong>`;
+            document.getElementById('savedSignature').src = signatureDataURL;
+            approvedBox.style.display = 'block';
+
+            Swal.fire({
+                icon: 'success',
+                title: 'تم الاعتماد والتوقيع',
+                text: 'شكراً لك سعادة المدير عياد الخالد، تم تسجيل توقيعك وتاريخ الاعتماد الهجري بنجاح.',
+                confirmButtonColor: '#006837'
+            });
+        });
+    </script>
+</body>
+</html>
