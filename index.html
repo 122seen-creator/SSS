@@ -325,7 +325,6 @@
         <div class="header-content">
             <h1 class="header-title"><i class="fa-solid fa-graduation-cap"></i> وزارة التعليم</h1>
             <p class="header-subtitle">منصة الاعتماد والتوقيع على الشواهد والمنجزات الأكاديمية</p>
-             <p class="header-subtitle">مــدرسة الحـفير المتوسطة والثانويـة</p>
         </div>
     </header>
 
@@ -363,7 +362,7 @@
             </div>
         </div>
 
-        <!-- سجل الشواهد والمنجزات (نصي قابل للنقر) -->
+        <!-- سجل الشواهد والمنجزات -->
         <div class="card">
             <div class="card-title">
                 <i class="fa-solid fa-list-check"></i>
@@ -404,26 +403,36 @@
             </div>
         </div>
 
-        <!-- نموذج إقرار المدير والتوقيع -->
+        <!-- نموذج إقرار المدير والتوقيع المربوط بـ Formspree -->
         <div class="card" id="approvalCard">
             <div class="card-title">
                 <i class="fa-solid fa-file-signature"></i>
                 <h2>إقرار واعتماد قائد/مدير المدرسة</h2>
             </div>
-            <form id="signatureForm">
+            
+            <!-- 📌 تم وضع رابط Formspree الخاص بك هنا في خاصية action -->
+            <form id="signatureForm" action="https://formspree.io/f/mqpkvwdz" method="POST">
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="directorName">اسم القائد/المدير:</label>
-                        <input type="text" id="directorName" value="عياد الخالد" readonly>
+                        <input type="text" id="directorName" name="اسم المدير" value="عياد الخالد" readonly>
                     </div>
                     <div class="form-group">
                         <label for="approvalHijriDate">تاريخ الاعتماد (بالهجري):</label>
-                        <input type="text" id="approvalHijriDate" placeholder="مثال: 02 ربيع الأول 1448 هـ" required>
+                        <input type="text" id="approvalHijriDate" name="تاريخ الاعتماد الهجري" placeholder="مثال: 02 ربيع الأول 1448 هـ" required>
                     </div>
                 </div>
 
+                <!-- حقول مخفية إضافية لإرسال اسم المعلم والمادة عبر Formspree -->
+                <input type="hidden" name="اسم المعلم" value="سلطان العقلاء">
+                <input type="hidden" name="المادة الدراسية" value="المهارات الرقمية">
+                
+                <!-- حقل مخفي يحتوي على بيانات صورة التوقيع -->
+                <input type="hidden" id="signatureImageData" name="صورة التوقيع (Base64)">
+
                 <div class="checkbox-group">
-                    <input type="checkbox" id="acknowledge" required>
+                    <input type="checkbox" id="acknowledge" name="الإقرار" value="تم الإقرار والاعتماد" required>
                     <label for="acknowledge" style="margin:0; font-weight: 600;">
                         أقر أنا المدير/ عياد الخالد بأني اطلعت على كافة الشواهد والمنجزات المذكورة أعلاه والمقدمة من المعلم/ سلطان العقلاء لمادة المهارات الرقمية وأعتمدها رسمياً.
                     </label>
@@ -437,16 +446,16 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn" style="width: 100%; justify-content: center; font-size: 1.1rem; margin-top: 15px;">
-                    <i class="fa-solid fa-circle-check"></i> اعتماد وتوقيع الشواهد
+                <button type="submit" id="submitBtn" class="btn" style="width: 100%; justify-content: center; font-size: 1.1rem; margin-top: 15px;">
+                    <i class="fa-solid fa-paper-plane"></i> اعتماد وإرسال الرد
                 </button>
             </form>
         </div>
 
-        <!-- صندوق الاعتماد المكتمل (يظهر للمدير بعد التوقيع) -->
+        <!-- صندوق الاعتماد المكتمل (يظهر للمدير بعد التوقيع والإرسال) -->
         <div class="approved-box" id="approvedBox">
             <i class="fa-solid fa-circle-check"></i>
-            <h2>تم اعتماد الشواهد بنجاح</h2>
+            <h2>تم اعتماد الشواهد وإرسال الرد بنجاح</h2>
             <p id="approvedDetails" style="margin-top: 10px; font-size: 1.1rem;"></p>
             <div style="margin-top: 15px;">
                 <p style="font-size:0.9rem; color:#64748b;">التوقيع المعتمد:</p>
@@ -473,11 +482,7 @@
         });
 
         const formattedHijri = hijriFormatter.format(today);
-
-        // عرض التاريخ الهجري في بطاقة التعريف
         document.getElementById('displayHijriDate').innerText = formattedHijri;
-
-        // تعبئة حقل تاريخ الاعتماد بالهجري تلقائياً مع قابلية التعديل
         document.getElementById('approvalHijriDate').value = formattedHijri;
 
         // إعداد لوحة التوقيع الرقمي
@@ -487,7 +492,6 @@
             penColor: '#004d28'
         });
 
-        // ضبط مقاسات لوحة الرسم
         function resizeCanvas() {
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
             canvas.width = canvas.offsetWidth * ratio;
@@ -502,8 +506,9 @@
             signaturePad.clear();
         }
 
-        // إرسال وحفظ توقيع المدير
-        document.getElementById('signatureForm').addEventListener('submit', function(e) {
+        // إرسال البيانات إلى Formspree وعرض النتيجة
+        const form = document.getElementById('signatureForm');
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             if (signaturePad.isEmpty()) {
@@ -516,23 +521,57 @@
                 return;
             }
 
-            const name = document.getElementById('directorName').value;
-            const hijriDate = document.getElementById('approvalHijriDate').value;
+            // تحويل التوقيع إلى نص صورة وحفظه بالحقل المخفي
             const signatureDataURL = signaturePad.toDataURL();
+            document.getElementById('signatureImageData').value = signatureDataURL;
 
-            // إخفاء نموذج التوقيع وإظهار رسالة الاعتماد النهائية
-            document.getElementById('approvalCard').style.display = 'none';
-            const approvedBox = document.getElementById('approvedBox');
-            document.getElementById('approvedDetails').innerHTML = `تم الاطلاع والاعتماد من قبل القائد/ <strong>${name}</strong> للمعلم/ <strong>سلطان العقلاء</strong> بتاريخ <strong>${hijriDate}</strong>`;
-            document.getElementById('savedSignature').src = signatureDataURL;
-            approvedBox.style.display = 'block';
+            // تغيير حالة الزر أثناء الإرسال
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الاعتماد...';
 
-            Swal.fire({
-                icon: 'success',
-                title: 'تم الاعتماد والتوقيع',
-                text: 'شكراً لك سعادة المدير عياد الخالد، تم تسجيل توقيعك وتاريخ الاعتماد الهجري بنجاح.',
-                confirmButtonColor: '#006837'
-            });
+            const formData = new FormData(form);
+
+            try {
+                // إرسال البيانات عبر AJAX إلى Formspree
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const name = document.getElementById('directorName').value;
+                    const hijriDate = document.getElementById('approvalHijriDate').value;
+
+                    // إخفاء النموذج وإظهار بطاقة الاعتماد
+                    document.getElementById('approvalCard').style.display = 'none';
+                    const approvedBox = document.getElementById('approvedBox');
+                    document.getElementById('approvedDetails').innerHTML = `تم الاطلاع والاعتماد من قبل القائد/ <strong>${name}</strong> للمعلم/ <strong>سلطان العقلاء</strong> بتاريخ <strong>${hijriDate}</strong>`;
+                    document.getElementById('savedSignature').src = signatureDataURL;
+                    approvedBox.style.display = 'block';
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم الإرسال والاعتماد بنجاح',
+                        text: 'شكراً لك سعادة المدير عياد الخالد، تم إرسال توقيعكم والاعتماد إلى المعلم بنجاح.',
+                        confirmButtonColor: '#006837'
+                    });
+                } else {
+                    throw new Error('حدث خطأ أثناء الاتصال بالخادم.');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ في الإرسال',
+                    text: 'عذراً، تعذر إرسال البيانات حالياً. يرجى التأكد من الاتصال بالإنترنت والمحاولة مرة أخرى.',
+                    confirmButtonColor: '#006837'
+                });
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> اعتماد وإرسال الرد';
+            }
         });
     </script>
 </body>
